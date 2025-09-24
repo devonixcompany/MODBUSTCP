@@ -5,9 +5,19 @@ from .memory_repositories import (
     InMemoryReadingRepository, 
     InMemoryConfigRepository
 )
+from .postgresql.repositories import (
+    PostgreSQLDeviceRepository,
+    PostgreSQLReadingRepository,
+    PostgreSQLConfigRepository
+)
+from .influxdb.repositories import InfluxDBReadingRepository
 
 __all__ = [
     "InMemoryDeviceRepository",
     "InMemoryReadingRepository", 
-    "InMemoryConfigRepository"
+    "InMemoryConfigRepository",
+    "PostgreSQLDeviceRepository",
+    "PostgreSQLReadingRepository",
+    "PostgreSQLConfigRepository",
+    "InfluxDBReadingRepository",
 ]

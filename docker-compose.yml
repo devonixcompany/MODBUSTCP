@@ -1,22 +1,73 @@
 version: '3.8'
 
 services:
-  modbustcp-service:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: modbustcp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: modbustcp_db
+      POSTGRES_USER: modbustcp_user
+      POSTGRES_PASSWORD: modbustcp_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U modbustcp_user -d modbustcp_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # InfluxDB (optional, for time-series data)
+  influxdb:
+    image: influxdb:2.7-alpine
+    container_name: modbustcp-influxdb
+    restart: unless-stopped
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: modbustcp_admin
+      DOCKER_INFLUXDB_INIT_ORG: modbustcp
+      DOCKER_INFLUXDB_INIT_BUCKET: readings
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: modbustcp-super-secret-token
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    ports:
+      - "8086:8086"
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MODBUS TCP Service - API
+  modbustcp-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: modbustcp-service
+    container_name: modbustcp-api
     restart: unless-stopped
+    depends_on:
+      - postgres
     
     # Environment variables
     environment:
       - MODBUS_ENVIRONMENT=production
       - MODBUS_DEBUG=false
+      - DATABASE_URL=postgresql://modbustcp_user:modbustcp_pass@postgres:5432/modbustcp_db
+      - READING_STORE=postgresql
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=modbustcp-super-secret-token
+      - INFLUXDB_ORG=modbustcp
+      - INFLUXDB_BUCKET=readings
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
     
     # Volumes
     volumes:
       - ./config:/app/config:ro
-      - ./data:/app/data
       - ./logs:/var/log/modbustcp
     
     # Network mode for MODBUS TCP access
@@ -26,24 +77,24 @@ services:
     deploy:
       resources:
         limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
           memory: 512M
           cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
     
     # Health check
     healthcheck:
-      test: ["CMD", "python", "-c", "import sys; sys.path.insert(0, '/app/src'); from infrastructure.modbus import PyModbusClient; print('OK')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 30s
     
-    # Default command (can be overridden)
-    command: ["python", "-m", "presentation.cli.main", "info"]
+    # Run API server
+    command: ["python", "api_server.py"]
 
-  # Optional: Add a monitoring service
+  # MODBUS TCP Service - CLI (optional monitoring service)
   modbustcp-monitor:
     build:
       context: .
@@ -51,25 +102,47 @@ services:
     container_name: modbustcp-monitor
     restart: unless-stopped
     depends_on:
-      - modbustcp-service
+      - modbustcp-api
     
     environment:
       - MODBUS_ENVIRONMENT=production
       - MODBUS_DEBUG=false
+      - DATABASE_URL=postgresql://modbustcp_user:modbustcp_pass@postgres:5432/modbustcp_db
+      - READING_STORE=postgresql
     
     volumes:
       - ./config:/app/config:ro
-      - ./data:/app/data
       - ./logs:/var/log/modbustcp
     
     network_mode: host
     
-    # Run monitoring command
-    command: ["python", "-m", "presentation.cli.main", "monitor", "health-all"]
+    # Run monitoring command periodically (example)
+    command: ["python", "modbustcp.py", "monitor", "health-all"]
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: modbustcp-nginx
+    restart: unless-stopped
+    depends_on:
+      - modbustcp-api
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl/certs:ro
+    profiles:
+      - proxy
 
 # Create named volumes for persistent data
 volumes:
-  modbustcp-data:
+  postgres_data:
     driver: local
-  modbustcp-logs:
+  influxdb_data:
     driver: local
+
+# Networks
+networks:
+  default:
+    name: modbustcp-network
