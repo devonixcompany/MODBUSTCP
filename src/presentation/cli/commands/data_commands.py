@@ -5,7 +5,11 @@ from datetime import datetime, timedelta
 import click
 from tabulate import tabulate
 
-from ....domain.value_objects import DeviceId
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+
+from domain.value_objects import DeviceId
 
 
 class DataCommands:

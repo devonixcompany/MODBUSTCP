@@ -4,17 +4,21 @@ import asyncio
 import logging
 import sys
 from typing import Optional
+from pathlib import Path
 
 import click
 
-from ...infrastructure.config import load_config
-from ...infrastructure.database import (
+# Add src to path for standalone execution
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from infrastructure.config import load_config
+from infrastructure.database import (
     InMemoryDeviceRepository,
     InMemoryReadingRepository,
     InMemoryConfigRepository
 )
-from ...infrastructure.modbus import PyModbusClient
-from ...application.use_cases import (
+from infrastructure.modbus import PyModbusClient
+from application.use_cases import (
     DeviceManagementUseCase,
     DataCollectionUseCase,
     DeviceMonitoringUseCase
@@ -105,8 +109,8 @@ def test_connection(ctx, host: str, port: int, unit: int, timeout: int):
     """Test connection to a MODBUS device."""
     
     async def _test():
-        from ...domain.value_objects import ModbusAddress
-        from ...infrastructure.modbus import PyModbusClient
+        from domain.value_objects import ModbusAddress
+        from infrastructure.modbus import PyModbusClient
         
         client = PyModbusClient()
         address = ModbusAddress(host, port)

@@ -1,0 +1,109 @@
+# SDM120 Energy Meter Configuration Template
+name: "SDM120 Energy Meter"
+type: "SDM120"
+address:
+  host: "10.1.2.1"
+  port: 502
+unit_id: 1
+timeout: 3
+polling_interval: 30
+
+registers:
+  # Core electrical measurements
+  - name: "voltage"
+    address: 0x0000  # 30001
+    data_type: "float32"
+    unit: "V"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Line to neutral voltage"
+    
+  - name: "current"
+    address: 0x0006  # 30007
+    data_type: "float32"
+    unit: "A"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Current"
+    
+  - name: "active_power"
+    address: 0x000C  # 30013
+    data_type: "float32"
+    unit: "W"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Total active power"
+    
+  - name: "apparent_power"
+    address: 0x0012  # 30019
+    data_type: "float32"
+    unit: "VA"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Total apparent power"
+    
+  - name: "reactive_power"
+    address: 0x0018  # 30025
+    data_type: "float32"
+    unit: "var"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Total reactive power"
+    
+  - name: "power_factor"
+    address: 0x001E  # 30031
+    data_type: "float32"
+    unit: ""
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Power factor"
+    
+  - name: "frequency"
+    address: 0x0046  # 30071
+    data_type: "float32"
+    unit: "Hz"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Frequency"
+    
+  # Energy measurements
+  - name: "total_energy"
+    address: 0x0156  # 30343
+    data_type: "float32"
+    unit: "kWh"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Total energy"
+    
+  - name: "import_energy"
+    address: 0x0048  # 30073
+    data_type: "float32"
+    unit: "kWh"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Import energy"
+    
+  - name: "export_energy"
+    address: 0x004A  # 30075
+    data_type: "float32"
+    unit: "kWh"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Export energy"
+    
+  # Demand measurements
+  - name: "total_demand"
+    address: 0x0054  # 30085
+    data_type: "float32"
+    unit: "W"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Total demand"
+    
+  - name: "max_total_demand"
+    address: 0x0056  # 30087
+    data_type: "float32"
+    unit: "W"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Maximum total demand"

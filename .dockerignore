@@ -1,0 +1,61 @@
+# Docker ignore file
+
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test data
+test_data/
+*.tmp
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Development files
+.editorconfig
+.pre-commit-config.yaml
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Original scripts (keeping for reference but not needed in container)
+*.py.original
+legacy/

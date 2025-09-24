@@ -3,13 +3,12 @@
 from typing import List, Optional
 import logging
 import asyncio
+import struct
 
 from pymodbus.client import ModbusTcpClient
-from pymodbus.payload import BinaryPayloadDecoder
-from pymodbus.constants import Endian
 
-from ...application.interfaces import ModbusClient
-from ...domain.value_objects import ModbusAddress
+from application.interfaces import ModbusClient
+from domain.value_objects import ModbusAddress
 
 logger = logging.getLogger(__name__)
 
@@ -232,20 +231,16 @@ class PyModbusClient(ModbusClient):
             return None
         
         try:
-            # Handle different endianness
+            # Convert registers to bytes based on byte order
             if byte_order.lower() == "big":
-                byteorder = Endian.BIG
-                wordorder = Endian.BIG
+                # Big endian: high register first
+                bytes_data = struct.pack('>HH', registers[0], registers[1])
             else:
-                byteorder = Endian.LITTLE
-                wordorder = Endian.LITTLE
+                # Little endian: low register first  
+                bytes_data = struct.pack('<HH', registers[1], registers[0])
             
-            decoder = BinaryPayloadDecoder.fromRegisters(
-                registers, 
-                byteorder=byteorder, 
-                wordorder=wordorder
-            )
-            return decoder.decode_32bit_float()
+            # Unpack as float
+            return struct.unpack('>f' if byte_order.lower() == "big" else '<f', bytes_data)[0]
             
         except Exception as e:
             logger.error(f"Error decoding float32 from registers: {e}")
