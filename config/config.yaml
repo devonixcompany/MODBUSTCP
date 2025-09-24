@@ -1,0 +1,147 @@
+# MODBUS TCP Service Configuration
+
+# Basic application settings
+debug: false
+environment: "production"
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "/var/log/modbustcp/app.log"  # Set to null for console only
+
+# MODBUS configuration
+modbus:
+  default_timeout: 3
+  default_retry_count: 3
+  connection_pool_size: 10
+
+# Monitoring configuration
+monitoring:
+  default_poll_interval: 30  # seconds
+  health_check_interval: 60  # seconds
+  max_reading_age_hours: 24   # hours
+
+# Database configuration
+database:
+  connection_string: "postgresql://modbustcp_user:password@localhost:5432/modbustcp_db"
+  reading_store: "postgresql"  # postgresql or influxdb
+  pool_size: 10
+  max_overflow: 20
+  echo: false
+
+# InfluxDB configuration (when using influxdb for readings)
+influxdb:
+  url: "http://localhost:8086"
+  token: "your-influxdb-token"
+  org: "modbustcp"
+  bucket: "readings"
+
+# API configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1
+  reload: false
+  cors_origins: ["*"]
+
+# Device configurations
+devices:
+  # Example SDM120 Energy Meter
+  sdm120_example:
+    name: "Main Energy Meter"
+    type: "SDM120"
+    address:
+      host: "10.1.2.1"
+      port: 502
+    unit_id: 1
+    timeout: 3
+    polling_interval: 30
+    registers:
+      - name: "voltage"
+        address: 0x0000
+        data_type: "float32"
+        unit: "V"
+        scale_factor: 1.0
+        offset: 0.0
+        description: "Line to neutral voltage"
+      - name: "current"
+        address: 0x0006
+        data_type: "float32"
+        unit: "A"
+        scale_factor: 1.0
+        offset: 0.0
+        description: "Current"
+      - name: "active_power"
+        address: 0x000C
+        data_type: "float32"
+        unit: "W"
+        scale_factor: 1.0
+        offset: 0.0
+        description: "Total active power"
+      - name: "frequency"
+        address: 0x0046
+        data_type: "float32"
+        unit: "Hz"
+        scale_factor: 1.0
+        offset: 0.0
+        description: "Frequency"
+      - name: "total_energy"
+        address: 0x0156
+        data_type: "float32"
+        unit: "kWh"
+        scale_factor: 1.0
+        offset: 0.0
+        description: "Total energy"
+
+  # Example PM2510-0D Dust Sensor
+  pm2510_0d_example:
+    name: "Air Quality Sensor"
+    type: "PM2510-0D"
+    address:
+      host: "10.1.2.1"
+      port: 502
+    unit_id: 4
+    timeout: 3
+    polling_interval: 60
+    registers:
+      - name: "pm25"
+        address: 0x0004
+        data_type: "uint16"
+        unit: "µg/m³"
+        scale_factor: 1.0
+        offset: 0.0
+        description: "PM2.5 concentration"
+      - name: "pm10"
+        address: 0x0009
+        data_type: "uint16"
+        unit: "µg/m³"
+        scale_factor: 1.0
+        offset: 0.0
+        description: "PM10 concentration"
+
+  # Example XY-MD02 Temperature/Humidity Sensor
+  xy_md02_example:
+    name: "Environmental Sensor"
+    type: "XY-MD02"
+    address:
+      host: "10.1.2.1"
+      port: 502
+    unit_id: 2
+    timeout: 3
+    polling_interval: 30
+    registers:
+      - name: "temperature"
+        address: 0x0001
+        data_type: "int16"
+        unit: "°C"
+        scale_factor: 0.1
+        offset: 0.0
+        description: "Temperature"
+      - name: "humidity"
+        address: 0x0002
+        data_type: "uint16"
+        unit: "%RH"
+        scale_factor: 0.1
+        offset: 0.0
+        description: "Relative humidity"

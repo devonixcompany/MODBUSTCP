@@ -1,0 +1,33 @@
+# XY-MD02 Temperature/Humidity Sensor Configuration Template
+name: "XY-MD02 Environmental Sensor"
+type: "XY-MD02"
+address:
+  host: "10.1.2.1"
+  port: 502
+unit_id: 2
+timeout: 3
+polling_interval: 30
+
+registers:
+  # Environmental measurements
+  - name: "temperature"
+    address: 0x0001
+    data_type: "int16"
+    unit: "°C"
+    scale_factor: 0.1
+    offset: 0.0
+    description: "Temperature (signed, divide by 10)"
+    
+  - name: "humidity"
+    address: 0x0002
+    data_type: "uint16"
+    unit: "%RH"
+    scale_factor: 0.1
+    offset: 0.0
+    description: "Relative humidity (unsigned, divide by 10)"
+
+# Special handling notes:
+# - Temperature is signed 16-bit (two's complement)
+# - Both values are scaled by 0.1 (divide by 10)
+# - Can read both registers together or individually
+# - Some firmware versions may only support individual reads

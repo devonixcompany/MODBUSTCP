@@ -1,0 +1,49 @@
+# PM2510-0D Dust Sensor Configuration Template
+name: "PM2510-0D Air Quality Sensor"
+type: "PM2510-0D"
+address:
+  host: "10.1.2.1"
+  port: 502
+unit_id: 4
+timeout: 3
+polling_interval: 60
+
+registers:
+  # Particulate matter measurements
+  - name: "pm25"
+    address: 0x0004
+    data_type: "uint16"
+    unit: "µg/m³"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "PM2.5 concentration"
+    
+  - name: "pm10"
+    address: 0x0009
+    data_type: "uint16"
+    unit: "µg/m³"
+    scale_factor: 1.0
+    offset: 0.0
+    description: "PM10 concentration"
+    
+  # Configuration parameters (read-only)
+  - name: "device_address"
+    address: 0x0100
+    data_type: "uint16"
+    unit: ""
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Device MODBUS address"
+    
+  - name: "baud_rate_setting"
+    address: 0x0101
+    data_type: "uint16"
+    unit: ""
+    scale_factor: 1.0
+    offset: 0.0
+    description: "Baud rate setting (0=2400, 1=4800, 2=9600)"
+
+# Special handling notes:
+# - Some firmware versions may require reading 6 consecutive registers from 0x0004
+# - Pattern: [PM2.5, reserved, reserved, PM10, reserved, reserved]
+# - Device may support both individual and bulk register reads
